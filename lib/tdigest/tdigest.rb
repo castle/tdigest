@@ -3,6 +3,7 @@ require 'tdigest/centroid'
 
 module TDigest
   class TDigest
+    attr_accessor :centroids
     def initialize(delta = 0.01, k = 25, cx = 1.1)
       @delta = delta
       @k = k
@@ -33,10 +34,10 @@ module TDigest
           last_c = v
         end
       end
-      lower = bounds[0]
-      upper = bounds[1]
+      # If still no results, pick lagging value if any
+      bounds << last_c if bounds.empty? && !last_c.nil?
 
-      [lower, upper]
+      bounds
     end
 
     def compress!
