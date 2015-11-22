@@ -102,7 +102,9 @@ module TDigest
           _cumulate(true)
           h = @n * item
           lower, upper = bound_mean_cumn(h)
-          if upper == lower || lower.nil? || upper.nil?
+          if lower.nil? && upper.nil?
+            nil
+          elsif upper == lower || lower.nil? || upper.nil?
             (lower || upper).mean
           elsif h == lower.mean_cumn
             lower.mean
@@ -207,4 +209,3 @@ module TDigest
     end
   end
 end
-
