@@ -97,6 +97,9 @@ module TDigest
       is_array = p.is_a? Array
       p = [p] unless is_array
       p.map! do |item|
+        unless (0..1).include? item
+          fail ArgumentError, "p should be in [0,1], got #{item}"
+        end
         if size == 0
           nil
         else
