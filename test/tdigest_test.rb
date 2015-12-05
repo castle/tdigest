@@ -1,4 +1,6 @@
 require 'test_helper'
+require 'ruby-prof'
+
 
 class TDigestTest < Minitest::Test
   extend Minitest::Spec::DSL
@@ -18,10 +20,33 @@ class TDigestTest < Minitest::Test
       -> { tdigest.percentile(1.1) }.must_raise ArgumentError
     end
 
-    describe 'with only signle value' do
+    describe 'with only single value' do
       it 'returns the value' do
         tdigest.push(60, 100)
         tdigest.percentile(0.90).must_equal 60
+      end
+
+      it 'returns 0 for all percentiles when only 0 present' do
+        tdigest.push(0)
+        tdigest.percentile([0.0, 0.5, 1.0]).must_equal [0, 0, 0]
+      end
+    end
+
+    describe 'with alot of uniformly distributed points' do
+      it 'has minimal error' do
+        N = 1_000
+        maxerr = 0
+        values = Array.new(N).map { rand }
+
+        tdigest.push(values)
+        tdigest.compress!
+
+        0.step(1,0.1).each do |i|
+          q = tdigest.percentile(i)
+          maxerr = [maxerr, (i-q).abs].max
+        end
+
+        assert_operator maxerr, :<, 0.02
       end
     end
   end
