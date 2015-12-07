@@ -1,6 +1,4 @@
 require 'test_helper'
-require 'ruby-prof'
-
 
 class TDigestTest < Minitest::Test
   extend Minitest::Spec::DSL
