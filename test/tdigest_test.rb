@@ -32,7 +32,7 @@ class TDigestTest < Minitest::Test
 
     describe 'with alot of uniformly distributed points' do
       it 'has minimal error' do
-        N = 1_000
+        N = 10_000
         maxerr = 0
         values = Array.new(N).map { rand }
 
