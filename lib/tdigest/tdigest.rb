@@ -164,7 +164,8 @@ module TDigest
 
     def _cumulate(exact = false)
       factor = @last_cumulate == 0 ? Float::INFINITY : (@n / @last_cumulate)
-      if @n == @last_cumulate
+      if @n == @last_cumulate ||
+        !exact && @cx && @cx > (factor)
         return
       end
 
@@ -178,8 +179,11 @@ module TDigest
     end
 
     def _digest(x, n)
-      min = @centroids.min
-      max = @centroids.max
+      # Use 'first' and 'last' instead of min/max because of performance reasons
+      # This works because RBTree is sorted
+      min = @centroids.first
+      max = @centroids.last
+
       min = min.nil? ? nil : min[1]
       max = max.nil? ? nil : max[1]
       nearest = find_nearest(x)
