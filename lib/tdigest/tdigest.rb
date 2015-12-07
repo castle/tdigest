@@ -72,12 +72,16 @@ module TDigest
     def p_rank(x)
       is_array = x.is_a? Array
       x = [x] unless is_array
+
+      min = @centroids.first
+      max = @centroids.last
+
       x.map! do |item|
         if size == 0
           nil
-        elsif item < @centroids.min[1].mean
+        elsif item < min[1].mean
           0.0
-        elsif item > @centroids.max[1].mean
+        elsif item > max[1].mean
           1.0
         else
           _cumulate(true)
@@ -138,7 +142,7 @@ module TDigest
     end
 
     def size
-      @centroids.count
+      @centroids.size
     end
 
     def to_a
