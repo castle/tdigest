@@ -9,6 +9,15 @@ class TDigestTest < Minitest::Test
     refute_nil ::TDigest::VERSION
   end
 
+  describe 'byte serialization' do
+    it 'loads serialized data' do
+      tdigest.push(60, 100)
+      bytes = tdigest.as_bytes
+      new_tdigest = TDigest::TDigest.from_bytes(bytes)
+      new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+    end
+  end
+
   describe 'JSON serialization' do
     it 'loads serialized data' do
       tdigest.push(60, 100)

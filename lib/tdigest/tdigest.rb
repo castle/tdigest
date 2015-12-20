@@ -3,6 +3,9 @@ require 'tdigest/centroid'
 
 module TDigest
   class TDigest
+    VERBOSE_ENCODING = 1
+    SMALL_ENCODING   = 2
+
     attr_accessor :centroids
     def initialize(delta = 0.01, k = 25, cx = 1.1)
       @delta = delta
@@ -11,6 +14,13 @@ module TDigest
       @centroids = RBTree.new
       @nreset = 0
       reset!
+    end
+
+    def as_bytes
+      output = [VERBOSE_ENCODING, 100, size]
+      output += @centroids.map { |_, c| c.mean }
+      output += @centroids.map { |_, c| c.n }
+      output.pack("LdLd#{size}L#{size}")
     end
 
     def as_json(_ = nil)
@@ -151,6 +161,16 @@ module TDigest
 
     def to_a
       @centroids.map { |_, c| c }
+    end
+
+    def self.from_bytes(bytes)
+      format, compression, size = bytes.unpack('LdL')
+      fail 'Unknown format' unless format == VERBOSE_ENCODING
+      array = bytes[16..-1].unpack("d#{size}L#{size}")
+      tdigest = new
+      means, counts = array.each_slice(size).to_a
+      means.zip(counts).each { |val| tdigest.push(val[0], val[1]) }
+      tdigest
     end
 
     def self.from_json(array)
