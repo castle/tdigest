@@ -6,5 +6,9 @@ module TDigest
         send("#{p}=", value)
       end
     end
+
+    def as_json(_ = nil)
+      { m: mean, n: n }
+    end
   end
 end

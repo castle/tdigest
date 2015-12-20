@@ -9,6 +9,15 @@ class TDigestTest < Minitest::Test
     refute_nil ::TDigest::VERSION
   end
 
+  describe 'JSON serialization' do
+    it 'loads serialized data' do
+      tdigest.push(60, 100)
+      json = tdigest.as_json
+      new_tdigest = ::TDigest::TDigest.from_json(json)
+      new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+    end
+  end
+
   describe '#percentile' do
     it 'returns nil if empty' do
       tdigest.percentile(0.90).must_be_nil # This should not crash

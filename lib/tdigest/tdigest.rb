@@ -13,6 +13,10 @@ module TDigest
       reset!
     end
 
+    def as_json(_ = nil)
+      @centroids.map { |_, c| c.as_json }
+    end
+
     def bound_mean(x)
       upper = @centroids.upper_bound(x)
       lower = @centroids.lower_bound(x)
@@ -149,6 +153,12 @@ module TDigest
       @centroids.map { |_, c| c }
     end
 
+    def self.from_json(array)
+      tdigest = new
+      # Handle both string and symbol keys
+      array.each { |a| tdigest.push(a['m'] || a[:m], a['n'] || a[:n]) }
+      tdigest
+    end
 
     private
 
