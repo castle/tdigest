@@ -13,8 +13,20 @@ class TDigestTest < Minitest::Test
     it 'loads serialized data' do
       tdigest.push(60, 100)
       bytes = tdigest.as_bytes
-      new_tdigest = TDigest::TDigest.from_bytes(bytes)
+      new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+    end
+
+    it 'handles zero size' do
+      bytes = tdigest.as_bytes
+      ::TDigest::TDigest.from_bytes(bytes).size.must_equal 0
+    end
+
+    it 'preserves compression' do
+      td = ::TDigest::TDigest.new(0.001)
+      bytes = td.as_bytes
+      new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
+      new_tdigest.compression.must_equal td.compression
     end
   end
 
@@ -50,7 +62,7 @@ class TDigestTest < Minitest::Test
 
     describe 'with alot of uniformly distributed points' do
       it 'has minimal error' do
-        N = 10_000
+        N = 100_000
         maxerr = 0
         values = Array.new(N).map { rand }
 
@@ -62,7 +74,7 @@ class TDigestTest < Minitest::Test
           maxerr = [maxerr, (i-q).abs].max
         end
 
-        assert_operator maxerr, :<, 0.02
+        assert_operator maxerr, :<, 0.01
       end
     end
   end

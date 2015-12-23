@@ -17,7 +17,9 @@ module TDigest
     end
 
     def as_bytes
-      output = [VERBOSE_ENCODING, 100, size]
+      # compression as defined by Java implementation
+      compression = self.compression
+      output = [VERBOSE_ENCODING, compression, size]
       output += @centroids.map { |_, c| c.mean }
       output += @centroids.map { |_, c| c.n }
       output.pack("LdLd#{size}L#{size}")
@@ -62,6 +64,10 @@ module TDigest
       end
       _cumulate(true)
       nil
+    end
+
+    def compression
+      1 / @delta
     end
 
     def find_nearest(x)
@@ -166,10 +172,13 @@ module TDigest
     def self.from_bytes(bytes)
       format, compression, size = bytes.unpack('LdL')
       fail 'Unknown format' unless format == VERBOSE_ENCODING
+      delta = 1 / compression
       array = bytes[16..-1].unpack("d#{size}L#{size}")
-      tdigest = new
-      means, counts = array.each_slice(size).to_a
-      means.zip(counts).each { |val| tdigest.push(val[0], val[1]) }
+      tdigest = new(delta)
+      if array.size > 0
+        means, counts = array.each_slice(size).to_a
+        means.zip(counts).each { |val| tdigest.push(val[0], val[1]) }
+      end
       tdigest
     end
 
