@@ -1,6 +1,7 @@
 # Tdigest
 
 [![Gem Version](https://badge.fury.io/rb/tdigest.svg)](https://badge.fury.io/rb/tdigest)
+[![Build Status](https://travis-ci.org/castle/tdigest.svg?branch=master)](https://travis-ci.org/castle/tdigest)
 
 Ruby implementation of Ted Dunning's [t-digest](https://github.com/tdunning/t-digest) data structure.
 
