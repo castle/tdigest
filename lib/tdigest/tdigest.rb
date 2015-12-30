@@ -198,6 +198,7 @@ module TDigest
       end
 
       nearest.cumn += n
+      nearest.mean_cumn = 0 if nearest.mean_cumn.nil?
       nearest.mean_cumn += n / 2
       nearest.n += n
       @n += n
