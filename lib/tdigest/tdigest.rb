@@ -191,7 +191,6 @@ module TDigest
 
     private
 
-
     def _add_weight(nearest, x, n)
       unless x == nearest.mean
         nearest.mean += n * (x - nearest.mean) / (nearest.n + n)
@@ -206,11 +205,8 @@ module TDigest
     end
 
     def _cumulate(exact = false)
-      factor = @last_cumulate == 0 ? Float::INFINITY : (@n / @last_cumulate)
-      if @n == @last_cumulate ||
-        !exact && @cx && @cx > (factor)
-        return
-      end
+      factor = @last_cumulate == 0 ? Float::INFINITY : (@n.to_f / @last_cumulate)
+      return if @n == @last_cumulate || (!exact && @cx && @cx > (factor))
 
       cumn = 0
       @centroids.each do |_, c|
