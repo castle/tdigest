@@ -196,21 +196,29 @@ module TDigest
         nearest.mean += n * (x - nearest.mean) / (nearest.n + n)
       end
 
+      _cumulate(false, true) if nearest.mean_cumn.nil?
+
       nearest.cumn += n
-      nearest.mean_cumn += n / 2
+      nearest.mean_cumn += n / 2.0
       nearest.n += n
       @n += n
 
       nil
     end
 
-    def _cumulate(exact = false)
-      factor = @last_cumulate == 0 ? Float::INFINITY : (@n.to_f / @last_cumulate)
-      return if @n == @last_cumulate || (!exact && @cx && @cx > (factor))
+    def _cumulate(exact = false, force = false)
+      unless force
+        factor = if @last_cumulate == 0
+          Float::INFINITY
+        else
+          (@n.to_f / @last_cumulate)
+        end
+        return if @n == @last_cumulate || (!exact && @cx && @cx > (factor))
+      end
 
       cumn = 0
       @centroids.each do |_, c|
-        c.mean_cumn = cumn + c.n / 2
+        c.mean_cumn = cumn + c.n / 2.0
         cumn = c.cumn = cumn + c.n
       end
       @n = @last_cumulate = cumn
