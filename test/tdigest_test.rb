@@ -12,9 +12,11 @@ class TDigestTest < Minitest::Test
   describe 'byte serialization' do
     it 'loads serialized data' do
       tdigest.push(60, 100)
+      10.times { tdigest.push(rand * 100) }
       bytes = tdigest.as_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+      new_tdigest.as_bytes.must_equal bytes
     end
 
     it 'handles zero size' do
@@ -27,6 +29,24 @@ class TDigestTest < Minitest::Test
       bytes = td.as_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       new_tdigest.compression.must_equal td.compression
+    end
+  end
+
+  describe 'small byte serialization' do
+    it 'loads serialized data' do
+      tdigest.push(60, 1000)
+      10.times { tdigest.push(rand * 100) }
+      bytes = tdigest.as_small_bytes
+      new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
+      # Expect some rounding error due to compression
+      new_tdigest.percentile(0.9).round(5).must_equal(
+        tdigest.percentile(0.9).round(5))
+      new_tdigest.as_small_bytes.must_equal bytes
+    end
+
+    it 'handles zero size' do
+      bytes = tdigest.as_small_bytes
+      ::TDigest::TDigest.from_bytes(bytes).size.must_equal 0
     end
   end
 
