@@ -35,7 +35,7 @@ class TDigestTest < Minitest::Test
   describe 'small byte serialization' do
     it 'loads serialized data' do
       tdigest.push(60, 1000)
-      10.times { tdigest.push(rand * 100) }
+      10.times { tdigest.push(rand * 10) }
       bytes = tdigest.as_small_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       # Expect some rounding error due to compression
