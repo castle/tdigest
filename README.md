@@ -35,6 +35,36 @@ puts td.percentile(0.5)
 puts td.p_rank(0.95)
 ```
 
+#### Serialization
+
+This gem offers the same serialization options as the original [Java implementation](https://github.com/tdunning/t-digest). You can read more about T-digest persistance in [Chapter 3 in the paper](https://github.com/tdunning/t-digest/blob/master/docs/t-digest-paper/histo.pdf).
+
+**Standard encoding**
+
+This encoding uses 8-byte Double for the means and a 4-byte integers for counts.
+Size per centroid is a fixed 12-bytes.
+
+```ruby
+bytes = tdigest.as_bytes
+```
+
+**Compressed encoding**
+
+This encoding uses delta encoding with 4-byte floats for the means and variable
+length encoding for the counts. Size per centroid is between 5-12 bytes.
+
+```ruby
+bytes = tdigest.as_small_bytes
+```
+
+**Deserializing**
+
+Deserialization will automatically detect compression format
+
+```ruby
+ tdigest = TDigest::TDigest.from_bytes(bytes)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
