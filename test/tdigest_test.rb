@@ -82,9 +82,11 @@ class TDigestTest < Minitest::Test
 
     describe 'with alot of uniformly distributed points' do
       it 'has minimal error' do
+        seed = srand(1234) # Makes the values a proper fixture
         N = 100_000
         maxerr = 0
         values = Array.new(N).map { rand }
+        srand(seed)
 
         tdigest.push(values)
         tdigest.compress!
