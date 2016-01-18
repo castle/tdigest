@@ -207,7 +207,7 @@ class TDigestTest < Minitest::Test
 
       it 'has the parameters of the calling tdigest' do
         vars = [:@delta, :@k, :@cs]
-        expected = vars.map { |v| [v, tdigest.instance_variable_get(v)] }.to_h
+        expected = Hash[vars.map { |v| [v, tdigest.instance_variable_get(v)] }]
         tdigest.merge!(@other)
         vars.each do |v|
           tdigest.instance_variable_get(v).must_equal expected[v]
