@@ -135,6 +135,13 @@ class TDigestTest < Minitest::Test
         123829787.23404256,
         103191489.36170213]
     end
+
+    it 'does not blow up if data comes in sorted' do
+      tdigest.push(0..10_000)
+      tdigest.centroids.size.must_be :<, 5_000
+      tdigest.compress!
+      tdigest.centroids.size.must_be :<, 1_000
+    end
   end
 
   describe '#size' do

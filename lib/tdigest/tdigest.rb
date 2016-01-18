@@ -312,6 +312,14 @@ module TDigest
 
       _cumulate(false)
 
+      # If the number of centroids has grown to a very large size,
+      # it may be due to values being inserted in sorted order.
+      # We combat that by replaying the centroids in random order,
+      # which is what compress! does
+      if @centroids.size > (@k / @delta)
+        compress!
+      end
+
       nil
     end
 
