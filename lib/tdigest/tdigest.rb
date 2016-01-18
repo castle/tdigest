@@ -27,13 +27,6 @@ module TDigest
       t
     end
 
-    def merge!(other)
-      # Uses delta, k and cx from the caller
-      t = self + other
-      @centroids = t.centroids
-      compress!
-    end
-
     def as_bytes
       # compression as defined by Java implementation
       size = @centroids.size
@@ -133,6 +126,13 @@ module TDigest
       else
         ceil[1]
       end
+    end
+
+    def merge!(other)
+      # Uses delta, k and cx from the caller
+      t = self + other
+      @centroids = t.centroids
+      compress!
     end
 
     def p_rank(x)
