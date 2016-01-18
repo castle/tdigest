@@ -18,6 +18,7 @@ module TDigest
 
     def as_bytes
       # compression as defined by Java implementation
+      size = @centroids.size
       output = [VERBOSE_ENCODING, compression, size]
       output += @centroids.map { |_, c| c.mean }
       output += @centroids.map { |_, c| c.n }
@@ -25,6 +26,7 @@ module TDigest
     end
 
     def as_small_bytes
+      size = @centroids.size
       output = [SMALL_ENCODING, compression, size]
       x = 0
       # delta encoding allows saving 4-bytes floats
@@ -188,7 +190,7 @@ module TDigest
     end
 
     def size
-      @centroids.size
+      @n || 0
     end
 
     def to_a

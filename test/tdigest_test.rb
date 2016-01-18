@@ -136,4 +136,13 @@ class TDigestTest < Minitest::Test
         103191489.36170213]
     end
   end
+
+  describe '#size' do
+    it 'reports the number of observations' do
+      n = 10_000
+      n.times { tdigest.push(rand) }
+      tdigest.compress!
+      tdigest.size.must_equal n
+    end
+  end
 end
