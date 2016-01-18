@@ -23,7 +23,6 @@ module TDigest
       while data.length > 0
         t.push_centroid(data.delete_at(rand(data.length)))
       end
-      t.compress!
       t
     end
 
