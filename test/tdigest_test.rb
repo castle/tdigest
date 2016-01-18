@@ -154,4 +154,38 @@ class TDigestTest < Minitest::Test
       tdigest.size.must_equal n
     end
   end
+
+  describe '#+' do
+    it 'works with empty tdigests' do
+      other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+      (tdigest + other).centroids.size.must_equal 0
+    end
+
+    describe 'adding two tdigests' do
+      before do
+        @other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+        [tdigest, @other].each do |td|
+          td.push(60, 100)
+          10.times { td.push(rand * 100) }
+        end
+      end
+
+      it 'has the parameters of the left argument (the calling tdigest)' do
+        new_tdigest = tdigest + @other
+        new_tdigest.instance_variable_get(:@delta).must_equal tdigest.instance_variable_get(:@delta)
+        new_tdigest.instance_variable_get(:@k).must_equal tdigest.instance_variable_get(:@k)
+        new_tdigest.instance_variable_get(:@cx).must_equal tdigest.instance_variable_get(:@cx)
+      end
+
+      it 'results in a tdigest with number of centroids less than or equal to the combined size' do
+        new_tdigest = tdigest + @other
+        new_tdigest.centroids.size.must_be :<=, tdigest.centroids.size + @other.centroids.size
+      end
+
+      it 'has the size of the two digests combined' do
+        new_tdigest = tdigest + @other
+        new_tdigest.size.must_equal (tdigest.size + @other.size)
+      end
+    end
+  end
 end

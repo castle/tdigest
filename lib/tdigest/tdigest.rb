@@ -16,6 +16,24 @@ module TDigest
       reset!
     end
 
+    def +(other)
+      # Uses delta, k and cx from the caller
+      t = self.class.new(@delta, @k, @cx)
+      data = self.centroids.values + other.centroids.values
+      while data.length > 0
+        t.push_centroid(data.delete_at(rand(data.length)))
+      end
+      t.compress!
+      t
+    end
+
+    def merge!(other)
+      # Uses delta, k and cx from the caller
+      t = self + other
+      @centroids = t.centroids
+      compress!
+    end
+
     def as_bytes
       # compression as defined by Java implementation
       size = @centroids.size
