@@ -16,6 +16,16 @@ module TDigest
       reset!
     end
 
+    def +(other)
+      # Uses delta, k and cx from the caller
+      t = self.class.new(@delta, @k, @cx)
+      data = self.centroids.values + other.centroids.values
+      while data.length > 0
+        t.push_centroid(data.delete_at(rand(data.length)))
+      end
+      t
+    end
+
     def as_bytes
       # compression as defined by Java implementation
       size = @centroids.size
@@ -115,6 +125,13 @@ module TDigest
       else
         ceil[1]
       end
+    end
+
+    def merge!(other)
+      # Uses delta, k and cx from the caller
+      t = self + other
+      @centroids = t.centroids
+      compress!
     end
 
     def p_rank(x)
@@ -311,6 +328,14 @@ module TDigest
       end
 
       _cumulate(false)
+
+      # If the number of centroids has grown to a very large size,
+      # it may be due to values being inserted in sorted order.
+      # We combat that by replaying the centroids in random order,
+      # which is what compress! does
+      if @centroids.size > (@k / @delta)
+        compress!
+      end
 
       nil
     end

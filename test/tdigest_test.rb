@@ -82,9 +82,11 @@ class TDigestTest < Minitest::Test
 
     describe 'with alot of uniformly distributed points' do
       it 'has minimal error' do
+        seed = srand(1234) # Makes the values a proper fixture
         N = 100_000
         maxerr = 0
         values = Array.new(N).map { rand }
+        srand(seed)
 
         tdigest.push(values)
         tdigest.compress!
@@ -135,6 +137,13 @@ class TDigestTest < Minitest::Test
         123829787.23404256,
         103191489.36170213]
     end
+
+    it 'does not blow up if data comes in sorted' do
+      tdigest.push(0..10_000)
+      tdigest.centroids.size.must_be :<, 5_000
+      tdigest.compress!
+      tdigest.centroids.size.must_be :<, 1_000
+    end
   end
 
   describe '#size' do
@@ -143,6 +152,79 @@ class TDigestTest < Minitest::Test
       n.times { tdigest.push(rand) }
       tdigest.compress!
       tdigest.size.must_equal n
+    end
+  end
+
+  describe '#+' do
+    it 'works with empty tdigests' do
+      other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+      (tdigest + other).centroids.size.must_equal 0
+    end
+
+    describe 'adding two tdigests' do
+      before do
+        @other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+        [tdigest, @other].each do |td|
+          td.push(60, 100)
+          10.times { td.push(rand * 100) }
+        end
+      end
+
+      it 'has the parameters of the left argument (the calling tdigest)' do
+        new_tdigest = tdigest + @other
+        new_tdigest.instance_variable_get(:@delta).must_equal tdigest.instance_variable_get(:@delta)
+        new_tdigest.instance_variable_get(:@k).must_equal tdigest.instance_variable_get(:@k)
+        new_tdigest.instance_variable_get(:@cx).must_equal tdigest.instance_variable_get(:@cx)
+      end
+
+      it 'results in a tdigest with number of centroids less than or equal to the combined centroids size' do
+        new_tdigest = tdigest + @other
+        new_tdigest.centroids.size.must_be :<=, tdigest.centroids.size + @other.centroids.size
+      end
+
+      it 'has the size of the two digests combined' do
+        new_tdigest = tdigest + @other
+        new_tdigest.size.must_equal (tdigest.size + @other.size)
+      end
+    end
+  end
+
+  describe '#merge!' do
+    it 'works with empty tdigests' do
+      other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+      tdigest.merge!(other)
+      (tdigest).centroids.size.must_equal 0
+    end
+
+    describe 'with populated tdigests' do
+      before do
+        @other = ::TDigest::TDigest.new(0.001, 50, 1.2)
+        [tdigest, @other].each do |td|
+          td.push(60, 100)
+          10.times { td.push(rand * 100) }
+        end
+      end
+
+      it 'has the parameters of the calling tdigest' do
+        vars = [:@delta, :@k, :@cs]
+        expected = Hash[vars.map { |v| [v, tdigest.instance_variable_get(v)] }]
+        tdigest.merge!(@other)
+        vars.each do |v|
+          tdigest.instance_variable_get(v).must_equal expected[v]
+        end
+      end
+
+      it 'results in a tdigest with number of centroids less than or equal to the combined centroids size' do
+        combined_size = tdigest.centroids.size + @other.centroids.size
+        tdigest.merge!(@other)
+        tdigest.centroids.size.must_be :<=, combined_size
+      end
+
+      it 'has the size of the two digests combined' do
+        combined_size = tdigest.size + @other.size
+        tdigest.merge!(@other)
+        tdigest.size.must_equal combined_size
+      end
     end
   end
 end
