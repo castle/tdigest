@@ -13,6 +13,7 @@ module TDigest
       @cx = cx
       @centroids = RBTree.new
       @nreset = 0
+      @n = 0
       reset!
     end
 
@@ -100,7 +101,7 @@ module TDigest
       while points.length > 0
         push_centroid(points.delete_at(rand(points.length)))
       end
-      _cumulate(true)
+      _cumulate(true, true)
       nil
     end
 
@@ -131,6 +132,7 @@ module TDigest
       # Uses delta, k and cx from the caller
       t = self + other
       @centroids = t.centroids
+      @n = t.size
       compress!
     end
 
@@ -277,7 +279,6 @@ module TDigest
       nearest.cumn += n
       nearest.mean_cumn += n / 2.0
       nearest.n += n
-      @n += n
 
       nil
     end
@@ -311,6 +312,8 @@ module TDigest
       max = max.nil? ? nil : max[1]
       nearest = find_nearest(x)
 
+      @n += n
+
       if nearest && nearest.mean == x
         _add_weight(nearest, x, n)
       elsif nearest == min
@@ -343,7 +346,6 @@ module TDigest
     def _new_centroid(x, n, cumn)
       c = Centroid.new({ mean: x, n: n, cumn: cumn })
       @centroids[x] = c
-      @n += n
       c
     end
   end
