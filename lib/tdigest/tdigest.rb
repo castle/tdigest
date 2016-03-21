@@ -101,7 +101,7 @@ module TDigest
       while points.length > 0
         push_centroid(points.delete_at(rand(points.length)))
       end
-      _cumulate(true)
+      _cumulate(true, true)
       nil
     end
 
