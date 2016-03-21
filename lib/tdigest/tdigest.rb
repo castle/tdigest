@@ -13,6 +13,7 @@ module TDigest
       @cx = cx
       @centroids = RBTree.new
       @nreset = 0
+      @n = 0
       reset!
     end
 
