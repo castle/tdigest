@@ -132,6 +132,7 @@ module TDigest
       # Uses delta, k and cx from the caller
       t = self + other
       @centroids = t.centroids
+      @n = t.size
       compress!
     end
 
