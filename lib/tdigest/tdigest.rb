@@ -98,9 +98,7 @@ module TDigest
     def compress!
       points = to_a
       reset!
-      while points.length > 0
-        push_centroid(points.delete_at(rand(points.length)))
-      end
+      push_centroid(points.shuffle)
       _cumulate(true, true)
       nil
     end
@@ -129,11 +127,8 @@ module TDigest
     end
 
     def merge!(other)
-      # Uses delta, k and cx from the caller
-      t = self + other
-      @centroids = t.centroids
-      @n = t.size
-      compress!
+      push_centroid(other.centroids.values.shuffle)
+      self
     end
 
     def p_rank(x)
