@@ -344,7 +344,7 @@ module TDigest
     end
 
     def _new_centroid(x, n, cumn)
-      c = Centroid.new({ mean: x, n: n, cumn: cumn })
+      c = Centroid.new(x, n, cumn)
       @centroids[x] = c
       c
     end
