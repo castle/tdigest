@@ -53,7 +53,7 @@ module TDigest
       c_arr = @centroids.each_with_object([]) do |(_, c), arr|
         k = 0
         n = c.n
-        while n.negative? || n > 0x7f
+        while n < 0 || n > 0x7f
           b = 0x80 | (0x7f & n)
           arr << b
           n = n >> 7
