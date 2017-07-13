@@ -17,7 +17,7 @@ class TDigestTest < Minitest::Test
       10.times { tdigest.push(rand * 100) }
       bytes = tdigest.as_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
-      new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+      new_tdigest.percentile(0.9).must_equal(tdigest.percentile(0.9))
       new_tdigest.as_bytes.must_equal bytes
     end
 
@@ -42,7 +42,8 @@ class TDigestTest < Minitest::Test
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       # Expect some rounding error due to compression
       new_tdigest.percentile(0.9).round(5).must_equal(
-        tdigest.percentile(0.9).round(5))
+        tdigest.percentile(0.9).round(5)
+      )
       new_tdigest.as_small_bytes.must_equal bytes
     end
 
@@ -93,9 +94,9 @@ class TDigestTest < Minitest::Test
         tdigest.push(values)
         tdigest.compress!
 
-        0.step(1,0.1).each do |i|
+        0.step(1, 0.1).each do |i|
           q = tdigest.percentile(i)
-          maxerr = [maxerr, (i-q).abs].max
+          maxerr = [maxerr, (i - q).abs].max
         end
 
         assert_operator maxerr, :<, 0.01
@@ -106,7 +107,8 @@ class TDigestTest < Minitest::Test
   describe '#push' do
     it "calls _cumulate so won't crash because of uninitialized mean_cumn" do
       td = TDigest::TDigest.new
-      td.push [125000000.0,
+      td.push [
+        125000000.0,
         104166666.66666666,
         135416666.66666666,
         104166666.66666666,
@@ -137,7 +139,8 @@ class TDigestTest < Minitest::Test
         113270270.27027026,
         154459459.45945945,
         123829787.23404256,
-        103191489.36170213]
+        103191489.36170213
+      ]
     end
 
     it 'does not blow up if data comes in sorted' do
@@ -186,7 +189,7 @@ class TDigestTest < Minitest::Test
 
       it 'has the size of the two digests combined' do
         new_tdigest = tdigest + @other
-        new_tdigest.size.must_equal (tdigest.size + @other.size)
+        new_tdigest.size.must_equal(tdigest.size + @other.size)
       end
     end
   end
@@ -195,7 +198,7 @@ class TDigestTest < Minitest::Test
     it 'works with empty tdigests' do
       other = ::TDigest::TDigest.new(0.001, 50, 1.2)
       tdigest.merge!(other)
-      (tdigest).centroids.size.must_equal 0
+      tdigest.centroids.size.must_equal(0)
     end
 
     describe 'with populated tdigests' do
@@ -208,7 +211,7 @@ class TDigestTest < Minitest::Test
       end
 
       it 'has the parameters of the calling tdigest' do
-        vars = [:@delta, :@k, :@cs]
+        vars = %i[@delta @k @cs]
         expected = Hash[vars.map { |v| [v, tdigest.instance_variable_get(v)] }]
         tdigest.merge!(@other)
         vars.each do |v|
