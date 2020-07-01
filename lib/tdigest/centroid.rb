@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module TDigest
   class Centroid
     attr_accessor :mean, :n, :cumn, :mean_cumn

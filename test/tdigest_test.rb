@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class TDigestTest < Minitest::Test
@@ -40,7 +42,8 @@ class TDigestTest < Minitest::Test
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       # Expect some rounding error due to compression
       new_tdigest.percentile(0.9).round(5).must_equal(
-        tdigest.percentile(0.9).round(5))
+        tdigest.percentile(0.9).round(5)
+      )
       new_tdigest.as_small_bytes.must_equal bytes
     end
 
@@ -91,9 +94,9 @@ class TDigestTest < Minitest::Test
         tdigest.push(values)
         tdigest.compress!
 
-        0.step(1,0.1).each do |i|
+        0.step(1, 0.1).each do |i|
           q = tdigest.percentile(i)
-          maxerr = [maxerr, (i-q).abs].max
+          maxerr = [maxerr, (i - q).abs].max
         end
 
         assert_operator maxerr, :<, 0.01
@@ -104,38 +107,38 @@ class TDigestTest < Minitest::Test
   describe '#push' do
     it "calls _cumulate so won't crash because of uninitialized mean_cumn" do
       td = TDigest::TDigest.new
-      td.push [125000000.0,
-        104166666.66666666,
-        135416666.66666666,
-        104166666.66666666,
-        104166666.66666666,
-        93750000.0,
-        125000000.0,
-        62500000.0,
-        114583333.33333333,
-        156250000.0,
-        124909090.90909092,
-        104090909.0909091,
-        135318181.81818184,
-        104090909.0909091,
-        104090909.0909091,
-        93681818.18181819,
-        124909090.90909092,
-        62454545.45454546,
-        114500000.00000001,
-        156136363.63636366,
-        123567567.56756756,
-        102972972.97297296,
-        133864864.86486486,
-        102972972.97297296,
-        102972972.97297296,
-        92675675.67567568,
-        123567567.56756756,
-        61783783.78378378,
-        113270270.27027026,
-        154459459.45945945,
-        123829787.23404256,
-        103191489.36170213]
+      td.push [125_000_000.0,
+               104_166_666.66666666,
+               135_416_666.66666666,
+               104_166_666.66666666,
+               104_166_666.66666666,
+               93_750_000.0,
+               125_000_000.0,
+               62_500_000.0,
+               114_583_333.33333333,
+               156_250_000.0,
+               124_909_090.90909092,
+               104_090_909.0909091,
+               135_318_181.81818184,
+               104_090_909.0909091,
+               104_090_909.0909091,
+               93_681_818.18181819,
+               124_909_090.90909092,
+               62_454_545.45454546,
+               114_500_000.00000001,
+               156_136_363.63636366,
+               123_567_567.56756756,
+               102_972_972.97297296,
+               133_864_864.86486486,
+               102_972_972.97297296,
+               102_972_972.97297296,
+               92_675_675.67567568,
+               123_567_567.56756756,
+               61_783_783.78378378,
+               113_270_270.27027026,
+               154_459_459.45945945,
+               123_829_787.23404256,
+               103_191_489.36170213]
     end
 
     it 'does not blow up if data comes in sorted' do
@@ -193,7 +196,7 @@ class TDigestTest < Minitest::Test
     it 'works with empty tdigests' do
       other = ::TDigest::TDigest.new(0.001, 50, 1.2)
       tdigest.merge!(other)
-      (tdigest).centroids.size.must_equal 0
+      tdigest.centroids.size.must_equal 0
     end
 
     describe 'with populated tdigests' do
@@ -206,7 +209,7 @@ class TDigestTest < Minitest::Test
       end
 
       it 'has the parameters of the calling tdigest' do
-        vars = [:@delta, :@k, :@cs]
+        vars = %i[@delta @k @cs]
         expected = Hash[vars.map { |v| [v, tdigest.instance_variable_get(v)] }]
         tdigest.merge!(@other)
         vars.each do |v|
