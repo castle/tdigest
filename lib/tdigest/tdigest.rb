@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rbtree'
 require 'tdigest/centroid'
 
@@ -20,10 +22,8 @@ module TDigest
     def +(other)
       # Uses delta, k and cx from the caller
       t = self.class.new(@delta, @k, @cx)
-      data = self.centroids.values + other.centroids.values
-      while data.length > 0
-        t.push_centroid(data.delete_at(rand(data.length)))
-      end
+      data = centroids.values + other.centroids.values
+      t.push_centroid(data.delete_at(rand(data.length))) until data.empty?
       t
     end
 
@@ -56,7 +56,7 @@ module TDigest
           arr << b
           n = n >> 7
           k += 1
-          fail 'Unreasonable large number' if k > 6
+          raise 'Unreasonable large number' if k > 6
         end
         arr << n
       end
@@ -77,7 +77,7 @@ module TDigest
     def bound_mean_cumn(cumn)
       last_c = nil
       bounds = []
-      matches = @centroids.each do |k, v|
+      matches = @centroids.each do |_k, v|
         if v.mean_cumn == cumn
           bounds << v
           break
@@ -164,8 +164,9 @@ module TDigest
       p = [p] unless is_array
       p.map! do |item|
         unless (0..1).include? item
-          fail ArgumentError, "p should be in [0,1], got #{item}"
+          raise ArgumentError, "p should be in [0,1], got #{item}"
         end
+
         if size == 0
           nil
         else
@@ -219,7 +220,7 @@ module TDigest
       case format
       when VERBOSE_ENCODING
         array = bytes[start_idx..-1].unpack("d#{size}L#{size}")
-        means, counts = array.each_slice(size).to_a if array.size > 0
+        means, counts = array.each_slice(size).to_a unless array.empty?
       when SMALL_ENCODING
         means = bytes[start_idx..(start_idx + 4 * size)].unpack("f#{size}")
         # Decode delta encoding of means
@@ -237,7 +238,8 @@ module TDigest
           z = 0x7f & v
           shift = 7
           while (v & 0x80) != 0
-            fail 'Shift too large in decode' if shift > 28
+            raise 'Shift too large in decode' if shift > 28
+
             v = counts_bytes.shift || 0
             z += (v & 0x7f) << shift
             shift += 7
@@ -245,9 +247,9 @@ module TDigest
           counts << z
         end
         # This shouldn't happen
-        fail 'Mismatch' unless counts.size == means.size
+        raise 'Mismatch' unless counts.size == means.size
       else
-        fail 'Unknown compression format'
+        raise 'Unknown compression format'
       end
       if means && counts
         means.zip(counts).each { |val| tdigest.push(val[0], val[1]) }
@@ -281,11 +283,11 @@ module TDigest
     def _cumulate(exact = false, force = false)
       unless force
         factor = if @last_cumulate == 0
-          Float::INFINITY
-        else
-          (@n.to_f / @last_cumulate)
+                   Float::INFINITY
+                 else
+                   (@n.to_f / @last_cumulate)
         end
-        return if @n == @last_cumulate || (!exact && @cx && @cx > (factor))
+        return if @n == @last_cumulate || (!exact && @cx && @cx > factor)
       end
 
       cumn = 0
@@ -318,7 +320,7 @@ module TDigest
       else
         p = nearest.mean_cumn.to_f / @n
         max_n = (4 * @n * @delta * p * (1 - p)).floor
-        if (max_n - nearest.n >= n)
+        if max_n - nearest.n >= n
           _add_weight(nearest, x, n)
         else
           _new_centroid(x, n, nearest.cumn)
@@ -331,9 +333,7 @@ module TDigest
       # it may be due to values being inserted in sorted order.
       # We combat that by replaying the centroids in random order,
       # which is what compress! does
-      if @centroids.size > (@k / @delta)
-        compress!
-      end
+      compress! if @centroids.size > (@k / @delta)
 
       nil
     end
