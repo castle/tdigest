@@ -17,20 +17,20 @@ class TDigestTest < Minitest::Test
       10.times { tdigest.push(rand * 100) }
       bytes = tdigest.as_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
-      new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
-      new_tdigest.as_bytes.must_equal bytes
+      _(new_tdigest.percentile(0.9)).must_equal tdigest.percentile(0.9)
+      _(new_tdigest.as_bytes).must_equal bytes
     end
 
     it 'handles zero size' do
       bytes = tdigest.as_bytes
-      ::TDigest::TDigest.from_bytes(bytes).size.must_equal 0
+      _(::TDigest::TDigest.from_bytes(bytes).size).must_equal 0
     end
 
     it 'preserves compression' do
       td = ::TDigest::TDigest.new(0.001)
       bytes = td.as_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
-      new_tdigest.compression.must_equal td.compression
+      _(new_tdigest.compression).must_equal td.compression
     end
   end
 
@@ -41,15 +41,15 @@ class TDigestTest < Minitest::Test
       bytes = tdigest.as_small_bytes
       new_tdigest = ::TDigest::TDigest.from_bytes(bytes)
       # Expect some rounding error due to compression
-      new_tdigest.percentile(0.9).round(5).must_equal(
+      _(new_tdigest.percentile(0.9).round(5)).must_equal(
         tdigest.percentile(0.9).round(5)
       )
-      new_tdigest.as_small_bytes.must_equal bytes
+      _(new_tdigest.as_small_bytes).must_equal bytes
     end
 
     it 'handles zero size' do
       bytes = tdigest.as_small_bytes
-      ::TDigest::TDigest.from_bytes(bytes).size.must_equal 0
+      _(::TDigest::TDigest.from_bytes(bytes).size).must_equal 0
     end
   end
 
@@ -58,28 +58,28 @@ class TDigestTest < Minitest::Test
       tdigest.push(60, 100)
       json = tdigest.as_json
       new_tdigest = ::TDigest::TDigest.from_json(json)
-      new_tdigest.percentile(0.9).must_equal tdigest.percentile(0.9)
+      _(new_tdigest.percentile(0.9)).must_equal tdigest.percentile(0.9)
     end
   end
 
   describe '#percentile' do
     it 'returns nil if empty' do
-      tdigest.percentile(0.90).must_be_nil # This should not crash
+      _(tdigest.percentile(0.90)).must_be_nil # This should not crash
     end
 
     it 'raises ArgumentError of input not between 0 and 1' do
-      -> { tdigest.percentile(1.1) }.must_raise ArgumentError
+      _(-> { tdigest.percentile(1.1) }).must_raise ArgumentError
     end
 
     describe 'with only single value' do
       it 'returns the value' do
         tdigest.push(60, 100)
-        tdigest.percentile(0.90).must_equal 60
+        _(tdigest.percentile(0.90)).must_equal 60
       end
 
       it 'returns 0 for all percentiles when only 0 present' do
         tdigest.push(0)
-        tdigest.percentile([0.0, 0.5, 1.0]).must_equal [0, 0, 0]
+        _(tdigest.percentile([0.0, 0.5, 1.0])).must_equal [0, 0, 0]
       end
     end
 
@@ -143,9 +143,9 @@ class TDigestTest < Minitest::Test
 
     it 'does not blow up if data comes in sorted' do
       tdigest.push(0..10_000)
-      tdigest.centroids.size.must_be :<, 5_000
+      _(tdigest.centroids.size).must_be :<, 5_000
       tdigest.compress!
-      tdigest.centroids.size.must_be :<, 1_000
+      _(tdigest.centroids.size).must_be :<, 1_000
     end
   end
 
@@ -154,14 +154,14 @@ class TDigestTest < Minitest::Test
       n = 10_000
       n.times { tdigest.push(rand) }
       tdigest.compress!
-      tdigest.size.must_equal n
+      _(tdigest.size).must_equal n
     end
   end
 
   describe '#+' do
     it 'works with empty tdigests' do
       other = ::TDigest::TDigest.new(0.001, 50, 1.2)
-      (tdigest + other).centroids.size.must_equal 0
+      _((tdigest + other).centroids.size).must_equal 0
     end
 
     describe 'adding two tdigests' do
@@ -175,19 +175,19 @@ class TDigestTest < Minitest::Test
 
       it 'has the parameters of the left argument (the calling tdigest)' do
         new_tdigest = tdigest + @other
-        new_tdigest.instance_variable_get(:@delta).must_equal tdigest.instance_variable_get(:@delta)
-        new_tdigest.instance_variable_get(:@k).must_equal tdigest.instance_variable_get(:@k)
-        new_tdigest.instance_variable_get(:@cx).must_equal tdigest.instance_variable_get(:@cx)
+        _(new_tdigest.instance_variable_get(:@delta)).must_equal tdigest.instance_variable_get(:@delta)
+        _(new_tdigest.instance_variable_get(:@k)).must_equal tdigest.instance_variable_get(:@k)
+        _(new_tdigest.instance_variable_get(:@cx)).must_equal tdigest.instance_variable_get(:@cx)
       end
 
       it 'results in a tdigest with number of centroids less than or equal to the combined centroids size' do
         new_tdigest = tdigest + @other
-        new_tdigest.centroids.size.must_be :<=, tdigest.centroids.size + @other.centroids.size
+        _(new_tdigest.centroids.size).must_be :<=, tdigest.centroids.size + @other.centroids.size
       end
 
       it 'has the size of the two digests combined' do
         new_tdigest = tdigest + @other
-        new_tdigest.size.must_equal (tdigest.size + @other.size)
+        _(new_tdigest.size).must_equal (tdigest.size + @other.size)
       end
     end
   end
@@ -196,7 +196,7 @@ class TDigestTest < Minitest::Test
     it 'works with empty tdigests' do
       other = ::TDigest::TDigest.new(0.001, 50, 1.2)
       tdigest.merge!(other)
-      tdigest.centroids.size.must_equal 0
+      _(tdigest.centroids.size).must_equal 0
     end
 
     describe 'with populated tdigests' do
@@ -213,20 +213,24 @@ class TDigestTest < Minitest::Test
         expected = Hash[vars.map { |v| [v, tdigest.instance_variable_get(v)] }]
         tdigest.merge!(@other)
         vars.each do |v|
-          tdigest.instance_variable_get(v).must_equal expected[v]
+          if expected[v].nil?
+            _(tdigest.instance_variable_get(v)).must_be_nil
+          else
+            _(tdigest.instance_variable_get(v)).must_equal expected[v]
+          end
         end
       end
 
       it 'results in a tdigest with number of centroids less than or equal to the combined centroids size' do
         combined_size = tdigest.centroids.size + @other.centroids.size
         tdigest.merge!(@other)
-        tdigest.centroids.size.must_be :<=, combined_size
+        _(tdigest.centroids.size).must_be :<=, combined_size
       end
 
       it 'has the size of the two digests combined' do
         combined_size = tdigest.size + @other.size
         tdigest.merge!(@other)
-        tdigest.size.must_equal combined_size
+        _(tdigest.size).must_equal combined_size
       end
     end
   end
