@@ -77,7 +77,7 @@ module TDigest
     def bound_mean_cumn(cumn)
       last_c = nil
       bounds = []
-      matches = @centroids.each do |_k, v|
+      @centroids.each do |_k, v|
         if v.mean_cumn == cumn
           bounds << v
           break
@@ -286,7 +286,7 @@ module TDigest
                    Float::INFINITY
                  else
                    (@n.to_f / @last_cumulate)
-        end
+                 end
         return if @n == @last_cumulate || (!exact && @cx && @cx > factor)
       end
 
