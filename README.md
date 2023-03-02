@@ -1,8 +1,7 @@
-# Tdigest
+# t-digest Ruby
 
+[![Ruby CI](https://github.com/castle/tdigest/actions/workflows/specs.yml/badge.svg?branch=master)](https://github.com/castle/tdigest/actions/workflows/specs.yml)
 [![Gem Version](https://badge.fury.io/rb/tdigest.svg)](https://badge.fury.io/rb/tdigest)
-[![Build Status](https://travis-ci.org/castle/tdigest.svg?branch=master)](https://travis-ci.org/castle/tdigest)
-[![Coverage Status](https://coveralls.io/repos/castle/tdigest/badge.svg?branch=master&service=github)](https://coveralls.io/github/castle/tdigest?branch=master)
 
 Ruby implementation of Ted Dunning's [t-digest](https://github.com/tdunning/t-digest) data structure.
 
@@ -37,12 +36,11 @@ puts td.p_rank(0.95)
 
 #### Serialization
 
-This gem offers the same serialization options as the original [Java implementation](https://github.com/tdunning/t-digest). You can read more about T-digest persistance in [Chapter 3 in the paper](https://github.com/tdunning/t-digest/blob/master/docs/t-digest-paper/histo.pdf).
+This gem offers the same serialization options as the original [Java implementation](https://github.com/tdunning/t-digest). You can read more about T-digest persistence in [Chapter 3 in the paper](https://github.com/tdunning/t-digest/blob/master/docs/t-digest-paper/histo.pdf).
 
 **Standard encoding**
 
-This encoding uses 8-byte Double for the means and a 4-byte integers for counts.
-Size per centroid is a fixed 12-bytes.
+This encoding uses 8-byte Double for the means and a 4-byte integer for counts. Size per centroid is a fixed 12-bytes.
 
 ```ruby
 bytes = tdigest.as_bytes
@@ -50,8 +48,7 @@ bytes = tdigest.as_bytes
 
 **Compressed encoding**
 
-This encoding uses delta encoding with 4-byte floats for the means and variable
-length encoding for the counts. Size per centroid is between 5-12 bytes.
+This encoding uses delta encoding with 4-byte floats for the means and variable length encoding for the counts. Size per centroid is between 5-12 bytes.
 
 ```ruby
 bytes = tdigest.as_small_bytes
@@ -79,4 +76,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/castle
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
