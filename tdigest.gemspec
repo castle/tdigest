@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   if java
     spec.add_runtime_dependency 'rbtree-jruby', '~> 0.2.1'
   else
-    spec.add_runtime_dependency 'rbtree3', '~> 0.6.0'
+    spec.add_runtime_dependency 'rbtree3', '~> 0.7.1'
   end
 
   spec.add_development_dependency 'bundler', '~> 2.1'
